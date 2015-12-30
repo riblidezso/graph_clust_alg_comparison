@@ -1,6 +1,8 @@
 import networkx as nx
 import numpy as np
 
+from collections import Counter
+
 #function to create GN benchmark graph with given expected value in-partition edges
 def create_GN_benchmark_graph(k_in):
     #calculate edge probabilities
@@ -10,10 +12,8 @@ def create_GN_benchmark_graph(k_in):
 
     #create graph/partitions with nodes
     g=nx.Graph()
-    partitions=[]
     for j in xrange(1,5):
         nodes=[j*100+i for i in xrange(32)]
-        partitions.append(nodes)
         g.add_nodes_from(nodes)
 
     #add intra partition edges
@@ -41,22 +41,56 @@ def create_GN_benchmark_graph(k_in):
                         if np.random.random() < q:
                             g.add_edge(k1*100+i,k2*100+j)
 
-    return g,partitions
+    return g
 
-#function to evaluate a given partition
-#Note: partitions should be ordered as originally!!!
-def evaluate_partition(partition):
+
+def fraction_of_vertices_correctly_classified(partition):
+    '''
+    function to evaluate a partition
     
-    #check partition size
-    if len(partition)!=4:
-        print "Error, there should be 4 partitions"
-        return -1
+    input is the igraph output
     
-    #calculate correctly assigned nodes
-    correct=0
-    for part,j in zip(partition,xrange(1,5)):
-        for node in part:
-            if int(node)/100 == j:
-                correct+=1
-                
-    return correct/128.0
+    From Newman's article: (Fast algorithm for detecting community structure in networks)
+    
+        The criterion for deciding correct classification is as follows.
+        We find the largest set of vertices that are grouped together by 
+        the algorithm in each of the four known communities. If the algorithm
+        puts two or more of these sets in the same group, then all vertices 
+        in those sets are considered incorrectly classi- fied. Otherwise, 
+        they are considered correctly classified. All other vertices not in
+        the largest sets are considered incorrectly classified.
+        
+    '''
+    #get largest groups fro each original group
+    groups=[]
+    for i in xrange(4):
+        groups.append(get_largest_group(partition[i*32:(i+1)*32]))
+        
+    #add up sizes and check overlapping
+    correct_count=0
+    for i in xrange(4):
+        #check for overlapping
+        correct=True
+        for j in xrange(4):
+            if i!=j and groups[i][0]==groups[j][0] :
+                correct=False
+        
+        #sum if correct
+        if correct:
+            correct_count+=groups[i][1]
+            
+    return correct_count/128.0
+
+
+def get_largest_group(input_list):
+    '''
+    function to calculate largest group and its count
+    '''
+    group_counts=Counter(input_list)
+    max_group_count=max(group_counts.values())
+    group=group_counts.keys()[argmax(group_counts.values())]
+    return group,max_group_count
+
+
+def argmax(in_list):
+    return in_list.index(max(in_list)) 
