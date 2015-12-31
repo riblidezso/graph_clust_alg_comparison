@@ -1,10 +1,9 @@
 import networkx as nx
 import numpy as np
-
 from collections import Counter
 
-#function to create GN benchmark graph with given expected value in-partition edges
 def create_GN_benchmark_graph(k_in):
+    """create GN benchmark graph with given expected value of intra-partition edges"""
     #calculate edge probabilities
     k_out=16-k_in
     p=k_in/31.0
@@ -45,10 +44,8 @@ def create_GN_benchmark_graph(k_in):
 
 
 def fraction_of_vertices_correctly_classified(partition):
-    '''
-    function to evaluate a partition
-    
-    input is the igraph output
+    """
+    Evaluate a partition of GN synthetic test graph, return fvcc score.
     
     From Newman's article: (Fast algorithm for detecting community structure in networks)
     
@@ -59,8 +56,8 @@ def fraction_of_vertices_correctly_classified(partition):
         in those sets are considered incorrectly classi- fied. Otherwise, 
         they are considered correctly classified. All other vertices not in
         the largest sets are considered incorrectly classified.
-        
-    '''
+    """
+    
     #get largest groups fro each original group
     groups=[]
     for i in xrange(4):
@@ -83,9 +80,7 @@ def fraction_of_vertices_correctly_classified(partition):
 
 
 def get_largest_group(input_list):
-    '''
-    function to calculate largest group and its count
-    '''
+    """ Calculate largest group and its count in a list."""
     group_counts=Counter(input_list)
     max_group_count=max(group_counts.values())
     group=group_counts.keys()[argmax(group_counts.values())]
@@ -93,4 +88,5 @@ def get_largest_group(input_list):
 
 
 def argmax(in_list):
+    """ Return argmax of a list."""
     return in_list.index(max(in_list)) 
