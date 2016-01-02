@@ -57,18 +57,52 @@ def fraction_of_vertices_correctly_classified(partition):
         they are considered correctly classified. All other vertices not in
         the largest sets are considered incorrectly classified.
     """
-    
-    #get largest groups fro each original group
-    groups=[]
+
+    #generate true partititon
+    real_part=[]
     for i in xrange(4):
-        groups.append(get_largest_group(partition[i*32:(i+1)*32]))
+        for j in xrange(32):
+            real_part.append(i)
+            
+    #compare partition to true partition
+    fvcc=general_fvcc(partition,real_part)
+    return fvcc
+
+
+def general_fvcc(partition,real_partition):
+    """ 
+    Evaluate a clustering partition scheme in regard to a true scheme with the fvcc metric.
+   
+    From Newman's article: (Fast algorithm for detecting community structure in networks)
+    
+        The criterion for deciding correct classification is as follows.
+        We find the largest set of vertices that are grouped together by 
+        the algorithm in each of the four known communities. If the algorithm
+        puts two or more of these sets in the same group, then all vertices 
+        in those sets are considered incorrectly classi- fied. Otherwise, 
+        they are considered correctly classified. All other vertices not in
+        the largest sets are considered incorrectly classified.
+        
+    """
+    #get groups in the original clusters
+    real_clusters=dict()
+    for cluster,i in zip(real_partition,xrange(len(real_partition))):
+        if real_clusters.has_key(cluster):
+            real_clusters[cluster].append(i)
+        else:
+            real_clusters[cluster]=[i]    
+    
+    #get largest groups for each original group
+    groups=dict()
+    for cluster,nodes in real_clusters.iteritems():
+        groups[cluster]=get_largest_group([partition[i] for i in nodes])
         
     #add up sizes and check overlapping
     correct_count=0
-    for i in xrange(4):
+    for i in real_clusters.keys():
         #check for overlapping
         correct=True
-        for j in xrange(4):
+        for j in real_clusters.keys():
             if i!=j and groups[i][0]==groups[j][0] :
                 correct=False
         
@@ -76,7 +110,8 @@ def fraction_of_vertices_correctly_classified(partition):
         if correct:
             correct_count+=groups[i][1]
             
-    return correct_count/128.0
+    fvcc=float(correct_count)/len(partition)
+    return fvcc
 
 
 def get_largest_group(input_list):
