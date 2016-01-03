@@ -36,7 +36,7 @@ def best_modularity_level_w_igraph_method(graph,igraph_method):
     n_best_clusters=dendrogram.optimal_count
     
     #get best cluster membership
-    while(n_best_clusters <100):
+    while( n_best_clusters <= len(graph.vs) ):
         #try with the best, if it fails increment level
         try:
             best_clusters=dendrogram.as_clustering(n_best_clusters).membership
@@ -126,6 +126,8 @@ def test_igraph_method_on_real_graph(graph,igraph_method):
     """Test igraph community detection method on a real graph."""
     start=time.time()
     membership=best_modularity_level_w_igraph_method(graph,igraph_method)
-    print 'Modularity:',graph.modularity(membership)
-    print "It took:",time.time()-start,'s'
-    return membership
+    modularity=graph.modularity(membership)
+    exec_time=time.time()-start
+    print 'Modularity:', modularity
+    print "It took:",exec_time,'s'
+    return membership,modularity,exec_time
