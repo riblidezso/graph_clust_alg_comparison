@@ -125,3 +125,37 @@ def get_largest_group(input_list):
 def argmax(in_list):
     """ Return argmax of a list."""
     return in_list.index(max(in_list)) 
+    
+from seaborn.apionly import color_palette
+#plotting
+import matplotlib.pyplot as plt        
+def plot_example_graph(k_in):
+    """Plot an example GN benchmark graph."""
+    #import sns palette for nice colors
+
+    #set nice colors for graph
+    cols=color_palette('husl',4)
+    node_colors=[]
+    for i in xrange(4):
+        c=cols[i]
+        for j in xrange(32):
+            node_colors.append(c)
+
+    #create graph
+    test_g=create_GN_benchmark_graph(k_in=k_in)
+    
+    #plot it
+    fig=plt.figure(figsize=(16,9))
+    plt.axis('off')
+    #get layout
+    pos = nx.spring_layout(test_g)
+    #plot nodes
+    nodes=nx.draw_networkx_nodes(test_g,pos,node_color=node_colors,node_size=400)
+    # delete node edges
+    nodes.set_edgecolor('none')
+    #draw edges
+    nx.draw_networkx_edges(test_g,pos,edge_color='lightgrey')
+    #add title
+    dump=plt.title(r'Example synthetic benchmark graph $k_{in}=$'+str(k_in),fontsize=18)
+    #return fig
+    
