@@ -2,11 +2,11 @@
 
 ### Files
 
-The doc.ipynb contains the assigned documents.
+The doc.ipynb contains the assigned document.
 
 
-devel_notebooks/ cointain the notebook used to create and test the results.
+devel_notebooks/ cointain the notebooks used to create and test the results.
 
-my_modules/ containts the functions used at the end to create the results shown in the document
+my_modules/ containts the the python file with the functions used at the end to create the results shown in the document
 
 
