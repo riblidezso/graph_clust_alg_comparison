@@ -4,6 +4,7 @@ import igraph
 import networkx as nx
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 from girwan_newman_benchmark import create_GN_benchmark_graph
 from girwan_newman_benchmark import fraction_of_vertices_correctly_classified
@@ -112,7 +113,7 @@ def scan_k_in_vals(igraph_method,N,M,k_in_min=4,k_in_max=16):
 def load_nx_from_edges_file(filename):
     """ Load networkx graph from a txt file containing edges."""
     g=nx.Graph()
-    with open('facebook_combined.txt') as file_h:
+    with open(filename) as file_h:
         for line in file_h:
             g.add_edge(line.split()[0],line.split()[1])
     return g
@@ -122,12 +123,42 @@ def load_ig_from_edges_file(filename):
     ig_g,id_name,name_id=nx_2_ig(load_nx_from_edges_file(filename))
     return ig_g,id_name,name_id
 
-def test_igraph_method_on_real_graph(graph,igraph_method):
+def test_igraph_method_on_real_graph(filename,igraph_method):
     """Test igraph community detection method on a real graph."""
+    #load graph from edges
+    graph,id_name,name_id=load_ig_from_edges_file(filename)
+    
+    #bechmark method
     start=time.time()
     membership=best_modularity_level_w_igraph_method(graph,igraph_method)
     modularity=graph.modularity(membership)
     exec_time=time.time()-start
-    print 'Modularity:', modularity
-    print "It took:",exec_time,'s'
+    
     return membership,modularity,exec_time
+
+
+def plot_real_graph(filename,membership,title,ax):
+    """Plot a real graph with cluter membership colored."""
+    #define pretty node colors
+    from seaborn.apionly import color_palette
+    cols=color_palette('husl',max(membership))
+    node_cols=[]
+    for i in membership:
+        node_cols.append(cols[i-1])
+        
+    #load graph to plot
+    nx_g=load_nx_from_edges_file(filename)
+    
+    #no frame
+    plt.axis('off')
+    
+    #get layout
+    pos = nx.spring_layout(nx_g)
+    #plot nodes
+    nodes=nx.draw_networkx_nodes(nx_g,pos,node_color=node_cols,node_size=50,ax=ax)
+    # delete node edges
+    nodes.set_edgecolor('none')
+    #draw edges
+    nx.draw_networkx_edges(nx_g,pos,edge_color='lightgrey',ax=ax)
+    #add title
+    dump=plt.title(title,fontsize=18)
